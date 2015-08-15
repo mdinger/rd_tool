@@ -105,18 +105,12 @@ class Work:
 #set up Codec:QualityRange dictionary
 quality = {
 "daala": [5,7,11,16,25,37,55,81,122,181,270,400],
-"x264":
-range(1,52,5),
-"x265":
-range(5,52,5),
-"x265-rt":
-range(5,52,5),
-"vp8":
-range(4,64,4),
-"vp9":
-range(4,64,4),
-"thor":
-range(4,40,4)
+"x264": range(1,52,5),
+"x265": range(5,52,5),
+"x265-rt": range(5,52,5),
+"vp8": range(4,64,4),
+"vp9": range(4,64,4),
+"thor": range(4,40,4)
 }
 
 #declare the lists we will need
@@ -135,7 +129,7 @@ parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 parser.add_argument('-individual', action='store_true')
-parser.add_argument('-awsgroup', default='Daala')
+parser.add_argument('-awsgroup', default='Daala Test')
 args = parser.parse_args()
 
 aws_group_name = args.awsgroup
@@ -169,7 +163,7 @@ print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
 num_instances_to_use = (31 + total_num_of_jobs) / 18
 
 #...but lock AWS to a max number of instances
-max_num_instances_to_use = 15
+max_num_instances_to_use = 1
 
 if num_instances_to_use > max_num_instances_to_use:
   print(GetTime(),'Ideally, we should use',num_instances_to_use,
