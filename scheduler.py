@@ -44,7 +44,10 @@ def run(work_items, slots):
             if len(free_slots) != 0:
                 slot = free_slots.pop()
                 work = work_items.pop()
-                print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',slot.machine.host)
+                if work.job_type() == 'image_collate':
+                    print(GetTime(), 'Running image_collate')
+                else:
+                    print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',slot.machine.host)
                 threading.Thread(slot.execute(work))
                 taken_slots.append(slot)
         sleep(0.02)

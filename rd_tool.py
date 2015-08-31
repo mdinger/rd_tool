@@ -37,6 +37,8 @@ if 'EXTRA_OPTIONS' in os.environ:
 class Work:
     def __init__(self):
         self.failed = False
+    def job_type(self):
+        return 'various'
     def parse(self, stdout, stderr):
         self.raw = stdout
         split = None
@@ -107,8 +109,8 @@ parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 parser.add_argument('-individual', action='store_true')
-parser.add_argument('-awsgroup', default='Daala')
-parser.add_argument('-machines', default=13)
+parser.add_argument('-awsgroup', default='Daala Test')
+parser.add_argument('-machines', default=1)
 args = parser.parse_args()
 
 aws_group_name = args.awsgroup
