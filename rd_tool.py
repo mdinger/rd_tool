@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 
@@ -96,10 +97,37 @@ class ABWork:
             '" /home/ec2-user/daalatool/tools/ab_compare.sh -a /home/ec2-user/daalatool/tools/ -c daala -b '+str(self.bpp)+' '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
         (base, ext) = os.path.splitext(work.filename)
-        # search for the correct filename
-        filename = slot.check_shell('find -maxdepth 1 -name '+shellquote(base)+'*.png')
-        print(filename)
-        slot.get_file(filename, './')
+
+        # rename accordingly if it is video or otherwise
+        if 'video' in work.set:
+            # search for the correct filename
+            filename = slot.check_shell("find -maxdepth 1 -name '" + shellquote(base) + "*.ogv'").strip()
+
+            # filenames get extra info stuffed between the `y4m` and the new extension:
+            # ./grandma_short.y4m-11.ogv as an example. split on the two right `.`
+            split = filename.rsplit('.', 2)
+            # Remove middle section and trim all folder information
+            new_filename = '.'.join([split[0], split[2]]).split('/')[-1]
+        else:
+            # search for the correct filename
+            filename = slot.check_shell("find -maxdepth 1 -name " + shellquote(base) + "'*.png'").strip()
+
+            # picture filenames have more stuffed inside: ./Sking.y4m-50.ogv.png
+            split = filename.rsplit('.', 3)
+            # Trim y4m-50.ogv out and remove all folder information
+            new_filename = '.'.join([split[0], split[3]]).split('/')[-1]
+
+        print(filename + ' -> ' + new_filename)
+        # make a folder for these to be copied files in ../runs/T...
+        # bash mangles complex names so they must be escaped in `str_time`.
+        subprocess.Popen(['/bin/bash', '-c', 'mkdir --parents ' + os.environ['PWD'] + '/../runs/T' + shellquote(self.time) ])
+
+        # Files like `Florac-Le_Vibron-Source_du_Pêcher.y4m` cause errors requiring these decodes.
+        # Things like `()` and `'` in filenames the shellquotes.
+        remote_filename = shellquote(filename).decode('utf8')
+        local_filename = ('../runs/T' + self.time + '/' + new_filename).decode('utf8')
+
+        slot.get_file(remote_filename, local_filename)
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
 
@@ -181,6 +209,7 @@ for machine in machines:
     machine.setup()
     
 slots = awsremote.get_slots(machines)
+start_time = GetTime()
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
@@ -212,6 +241,7 @@ elif args.mode == 'ab':
             work = ABWork()
             work.bpp = bpp
             work.codec = args.codec
+            work.time = start_time
             if args.individual:
                 work.individual = True
             else:

@@ -6,6 +6,11 @@ from datetime import datetime
 import subprocess
 import sys
 
+# Finding files such as `this_(that)` requires `'` be placed on both
+# sides of the quote so the `()` are both captured. Files such as
+# `du_Parterre_d'Eau` must be converted into
+#`'du_Parterre_d'"'"'Eau'
+#                ^^^ Required to make sure the `'` is captured.
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
